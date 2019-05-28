@@ -1,0 +1,325 @@
+body {
+    background-color: bisque;
+}
+
+header {
+    position: fixed;
+    background-color: rgba(97, 129, 46, 0.137);
+    line-height: 50px;
+    top:0px;
+    left:0px;
+    width: 100%;
+    text-align: center;
+    color: aqua
+}
+
+.tile {
+    width:55px;
+    height: 100px;
+    left:50%;
+    top:50%;
+    position: inherit;
+    text-align: center;
+    font-size: 25px;
+    border-radius: 10%;
+    
+
+}
+
+.top {
+    margin:10px;
+}
+
+.bottom {
+
+}
+
+.selected {
+	border-style: solid;
+	border-color:red;
+}
+
+.container {
+	display: grid;
+  align-items: center;
+  background: no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/12005/grid.png);
+  grid-gap: 2px;
+  grid-template-columns:  repeat(100, 3px);
+  grid-template-rows: repeat(100, 3px);
+  background-color: #fff;
+  color: #444;
+}
+
+.game-table {
+    top:100px;
+    left:30%;
+    position: relative;
+		overflow-y:scroll;
+		box-shadow: 8px 6px 19px 1px rgb(163, 198, 214);
+		background-color:lightgrey;
+}
+
+td {
+    width:100px;
+    height:100px;
+}
+
+/*Shay's Themeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:*/
+
+
+.domino {
+    float: left;
+    font-size: 7px;
+    width: 6em;
+    height: 12em;
+    margin: 15px;
+    position: relative;
+    -webkit-border-radius: .8em;
+    -moz-border-radius: .8em;
+    border-radius: .8em;
+    -moz-box-shadow:    .3em .3em 0em .2em #333;
+    -webkit-box-shadow: .3em .3em 0em .2em #333;
+    box-shadow:         .3em .3em 0em .2em #333;
+ }
+ .domino, .domino span { 
+    background-color:#000
+  }
+
+  .domino .line {
+    width: 5.5em;
+    height: .2em;
+    position: absolute;
+    top: 5.7em;
+    left: .25em;
+    background-color: #fff;
+}
+/* Rounded Corners 
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    padding:2px;
+    */
+
+
+.part > div {
+    border-radius: 50%;
+    width: 5px; /* width and height can be anything, as long as they're equal */
+    height: 5px; 
+    background-color:black;
+    margin-top: 1px;
+}
+
+.line {
+    width:90%;
+    height:2%;
+    background-color:black;
+    margin-left: 5%;
+}
+/* Added CSS */
+.dominoe { margin-right: 10px; float: left; }
+.half { 
+  width: 70%;
+  height: 32%;
+  padding: 14%;
+} 
+/* setting padding removes the need to position the top-left, top-right, bottom-left and bottom-right elements */
+
+.part {
+  width: 100%;
+  height: 21.333%;
+  padding: 8% 0% 8% 0%; 
+  /* eliminates need for vertical positioning */
+}
+.part:first-child {
+  padding-top: 0%;
+}
+.part:last-child {
+  padding-bottom: 0%;
+}
+.right {
+  float: right;
+}
+.left {
+  float: left;
+}
+.middle {
+  margin: auto;
+}
+.horizontal {
+    transform: rotate(90deg);
+   -webkit-transform: rotate(90deg);
+   -o-transform: rotate(90deg);
+   -moz-transform: rotate(90deg);
+}
+.test
+{
+  font-size: 100px;
+}
+.domino .TL6 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 2.4em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+ .domino .TL456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 0.8em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+  }
+ 
+  .domino .TL23456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 4.0em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .TC135 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 2.4em;
+	left: 2.5em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .TR6 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 2.4em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+   .domino .TR456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 4.0em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+   .domino .TR23456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 0.8em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .BL6 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 8.0em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .BL456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 6.4em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+  }
+   
+  .domino .BL23456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 9.6em;
+	left: 1.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+ .domino .BC135 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 8.0em;
+	left: 2.5em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+ .domino .BR6 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 8.0em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .BR456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 9.6em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ }
+ 
+  .domino .BR23456 {
+	width: 1.2em;
+	height: 1.2em;
+	position: absolute;
+	top: 6.4em;
+	left: 4.0em;
+	-webkit-border-radius: 4em;
+	-moz-border-radius: 4em;
+	border-radius: 4em;
+	background-color: #fff;
+ } 
+ 
