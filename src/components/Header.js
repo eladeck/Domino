@@ -3,7 +3,7 @@ import React from "react"
 function Header() {
     return (
         <header>
-            Domino
+            Domino2
         </header>
 
     );
