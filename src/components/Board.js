@@ -6,7 +6,7 @@ import allTiles from './allTiles.js';
 class Board extends Component {
     constructor(props) {
         super(props);
-        this.boardSize = 6; // it's not part of the state! it's a property...
+        this.boardSize = 10; // it's not part of the state! it's a property...
 
         this.state = {
             jsx:null,
@@ -31,16 +31,18 @@ class Board extends Component {
         const i = id[0];
         const j = id[1];
 
-        // only if there is not alreay tile in the board 
+        // only if there is not already tile in this <td>, and if there's a selected tile
         if(this.props.selectedTile && this.state.logicBoard[i][j] === ' ') {
             const values = this.props.selectedTile.id;
             
             // only if the selecctedId is not empty string
             if(values) {
                 this.props.tileWasPlaced(this.props.selectedTile);
+
                 this.setState(prevState => {
                     let newLogicBoard = prevState.logicBoard; // deep or shallow copy? to think about whats better
-                    newLogicBoard[i][j] = values;
+                    newLogicBoard[i][j] = `${values},${this.props.selectedTile.parentNode.id[11]}`; // {values,verticality}
+                    console.log(newLogicBoard[i][j])
         
                     return {
                         logicBoard:newLogicBoard
@@ -98,7 +100,7 @@ class Board extends Component {
                             key={`${i}${j}`}
                             top={this.state.logicBoard[i][j][0]}
                             bottom={this.state.logicBoard[i][j][1]}
-                            verticality={0}
+                            verticality={this.state.logicBoard[i][j][3]}
                         />
                         }
                     </td>);

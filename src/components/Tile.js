@@ -19,11 +19,13 @@ class Tile extends Component {
   handleClick(event) {
     //event.preventDefault();
       console.log('in tile handle click')
-      this.setState(prevState => {
-        return {
-          verticality: (prevState.verticality + 1) % 4,
-        };
-      });
+      if(this.props.isSelected) {
+        this.setState(prevState => {
+          return {
+            verticality: (prevState.verticality + 1) % 4,
+          };
+        });
+      }
   }
 
   determineVerticality() {
@@ -55,14 +57,16 @@ class Tile extends Component {
       <div
         className='tile'
         onClick={this.handleClick} 
-        style={vertialictyStyle}>
+        style={vertialictyStyle}
+        id={`verticality${this.state.verticality}`}
+      >
         {this.generateTiles()}
 
       </div>
     );
   } // render
 
-
+///////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   generateTiles()
   {
       const zero = parseInt(0);

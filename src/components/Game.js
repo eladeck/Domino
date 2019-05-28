@@ -59,15 +59,11 @@ class Game extends Component {
         this.setState({incrementer: this.incrementer});
       }
 
-    handleSelected(theTileItself) {
-        const i_Id = theTileItself.id;
-
+    handleSelected(selectedTile) {
         // setState => selectedTile gets updated => Game gets rendered => Player props.selectedTile is having className='selected'
-        this.setState(prevState => {
-            return {
-                selectedTile: prevState.selectedTile === theTileItself ? null : theTileItself
-            }
-        });
+        this.setState({
+            selectedTile
+        })
     } // handleSelected
 
     takeTileFromPot()
@@ -154,6 +150,7 @@ class Game extends Component {
             <>
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
              <button type="button" onClick={this.handleStartClick}>start</button>
+             <button onClick={this.takeTileFromPot}>Pot</button>
                 <Statistics 
                     totalTurns = {this.state.totalTurns}
                     totalPot = {this.state.totalPot}
@@ -165,7 +162,6 @@ class Game extends Component {
                     selectedTile={this.state.selectedTile}
                     tileWasPlaced={this.tileWasPlaced}
                 />
-                <button onClick={this.takeTileFromPot}>Pot</button>
                 <Player 
                     tiles={this.state.playerTiles}
                     tileSelected={this.tileSelected}

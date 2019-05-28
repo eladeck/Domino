@@ -14,16 +14,9 @@ header {
 }
 
 .tile {
-    width:55px;
-    height: 100px;
-    left:50%;
-    top:50%;
-    position: inherit;
-    text-align: center;
-    font-size: 25px;
-    border-radius: 10%;
-    
-
+    width:fit-content;
+    height:fit-content;
+    position: relative;
 }
 
 .top {
@@ -49,28 +42,37 @@ header {
 }
 
 .game-table {
-    top:100px;
-    left:30%;
-    position: relative;
-		overflow-y:scroll;
+
+		top: 60px;
+		left: 300px;
+		position: absolute;
+		overflow:scroll;
 		box-shadow: 8px 6px 19px 1px rgb(163, 198, 214);
 		background-color:lightgrey;
 }
 
 td {
-    width:100px;
-    height:100px;
+    width:84px;
+    height:84px;
+}
+
+.player {
+	width: fit-content;
+	margin: 0;
+	position: absolute;
+	top: 50px;
+	left: 150px;
+
 }
 
 /*Shay's Themeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:*/
 
 
 .domino {
-    float: left;
+    float: center;
     font-size: 7px;
     width: 6em;
     height: 12em;
-    margin: 15px;
     position: relative;
     -webkit-border-radius: .8em;
     -moz-border-radius: .8em;

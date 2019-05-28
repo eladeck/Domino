@@ -23,7 +23,7 @@ class Player extends Component {
 
   render() {
     return (
-        <div onClick={this.handleClick} >
+        <div onClick={this.handleClick} className='player'>
             {this.props.tiles.map(indices =>
                <Tile
                  verticality={0}
