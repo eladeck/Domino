@@ -18,7 +18,7 @@ class Tile extends Component {
 
   handleClick(event) {
     //event.preventDefault();
-
+      console.log('in tile handle click')
       this.setState(prevState => {
         return {
           verticality: (prevState.verticality + 1) % 4,
@@ -49,7 +49,8 @@ class Tile extends Component {
   
   render(props) {
     let vertialictyStyle = this.determineVerticality();
-
+    console.log('in tile render verticailty is')
+    console.log(vertialictyStyle)
     return (
       <div
         className='tile'

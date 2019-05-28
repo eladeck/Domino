@@ -26,6 +26,7 @@ class Player extends Component {
         <div onClick={this.handleClick} >
             {this.props.tiles.map(indices =>
                <Tile
+                 verticality={0}
                  key={indices}
                  top={indices[0]}
                  bottom={indices[1]}
