@@ -22,6 +22,9 @@ class Game extends Component {
         this.shuffleTiles = this.shuffleTiles.bind(this);
         this.handleSelected = this.handleSelected.bind(this);
         this.tileWasPlaced = this.tileWasPlaced.bind(this);
+        this.takeTileFromPot = this.takeTileFromPot.bind(this);
+
+        
     }
 
     handleSelected(theTileItself) {
@@ -34,6 +37,28 @@ class Game extends Component {
             }
         });
     } // handleSelected
+
+    takeTileFromPot()
+    {
+        console.log("takeTileFromPot was ckicked");
+        console.log("pot" + this.state.potTiles);
+        console.log("player tiles" + this.state.playerTiles);
+
+
+        this.setState(prevState => {
+            const oldPotTiles = prevState.potTiles;
+            const oldPlayerTiles = prevState.playerTiles;
+
+            oldPlayerTiles.push(oldPotTiles.splice(oldPotTiles.length -1, 1)[0]);
+           // console.log("new pot" + oldPotTiles);
+         //   console.log("new player tiles" + oldPlayerTiles);
+            return{
+                potTiles: oldPotTiles,
+                playerTiles : oldPlayerTiles
+            }
+        })
+
+    }
 
     shuffleTiles() {
         let organized = this.createTiles();
@@ -81,12 +106,15 @@ class Game extends Component {
     }
     
     render() {
+        console.log("render pot" + this.state.potTiles);
+        console.log("render player tiles" + this.state.playerTiles);
         return (
             <>
                 <Board 
                     selectedTile={this.state.selectedTile}
                     tileWasPlaced={this.tileWasPlaced}
                 />
+                <button onClick={this.takeTileFromPot}>Pot</button>
                 <Player 
                     tiles={this.state.playerTiles}
                     tileSelected={this.tileSelected}
