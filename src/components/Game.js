@@ -2,30 +2,62 @@ import React, {Component} from 'react'
 import Board from './Board.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
+import Statistics from './Statistics.js'
 
+function formatSeconds(secondsElapsed) {
+    const minutes = Math.floor(secondsElapsed / 60);
+    const seconds = ('0' + secondsElapsed % 60).slice(-2);
+    return minutes + ':' + seconds;
+  }
 
 class Game extends Component {
     constructor(props) {
         super(props);
 
         const shuffledTiles = this.shuffleTiles();
-
+        const firstSix = shuffledTiles.slice(0, 6);
         this.state = {
             tiles: this.createTiles(), // ["00","01", ... ] 
             shuffledTiles: shuffledTiles,
             potTiles: shuffledTiles.slice(6, 28),
             playerTiles: shuffledTiles.slice(0, 6),
             selectedTile:null, // a REAL reference to the tile <div> element! (it's id is selectedTile.id)
+           
+            //stats
+            secondsElapsed: 0,
+            totalTurns: 0,
+            totalPot: 0,
+            avgTimePerTurn: 0,
+            score: this.getScoreFromTiles(firstSix)
         }
-
+        
         this.createTiles = this.createTiles.bind(this);
         this.shuffleTiles = this.shuffleTiles.bind(this);
         this.handleSelected = this.handleSelected.bind(this);
         this.tileWasPlaced = this.tileWasPlaced.bind(this);
         this.takeTileFromPot = this.takeTileFromPot.bind(this);
-
+        
+        this.handleStartClick = this.handleStartClick.bind(this);
+        this.getScoreFromTiles = this.getScoreFromTiles.bind(this);
         
     }
+    getScoreFromTiles(playerTiles){
+     
+        let res = 0;
+        for(let i = 0 ; i < playerTiles.length; i++)
+            res += parseInt((playerTiles[i])[0]) + parseInt((playerTiles[i])[1]);
+
+        return res;
+    }
+
+    handleStartClick() {
+        this.incrementer = setInterval(() => {
+          this.setState({
+            secondsElapsed: (this.state.secondsElapsed + 1)
+          });
+        }, 1000);
+        this.setState({incrementer: this.incrementer});
+      }
 
     handleSelected(theTileItself) {
         const i_Id = theTileItself.id;
@@ -40,10 +72,11 @@ class Game extends Component {
 
     takeTileFromPot()
     {
-        console.log("takeTileFromPot was ckicked");
-        console.log("pot" + this.state.potTiles);
-        console.log("player tiles" + this.state.playerTiles);
-
+        // console.log("takeTileFromPot was ckicked");
+        // console.log("pot" + this.state.potTiles);
+        // console.log("player tiles" + this.state.playerTiles);
+        console.log("total Seconds" + this.state.secondsElapsed)
+        console.log("totalTurns" + this.state.totalTurns);   
         if(this.state.potTiles.length === 0)
             alert("Pot is empty")
         else
@@ -53,11 +86,13 @@ class Game extends Component {
                 const oldPlayerTiles = prevState.playerTiles;
     
                 oldPlayerTiles.push(oldPotTiles.splice(oldPotTiles.length -1, 1)[0]);
-               // console.log("new pot" + oldPotTiles);
-             //   console.log("new player tiles" + oldPlayerTiles);
                 return{
                     potTiles: oldPotTiles,
-                    playerTiles : oldPlayerTiles
+                    playerTiles : oldPlayerTiles,
+                    totalTurns: prevState.totalTurns + 1,
+                    totalPot: prevState.totalPot + 1,
+                    avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1 ),
+                    score : this.getScoreFromTiles(this.state.playerTiles)
                 }
             })
         }
@@ -94,9 +129,13 @@ class Game extends Component {
             playerTiles.splice(playerTiles.indexOf(tile.id), 1);
             return {
                 selectedTile:null,
-                playerTiles
+                playerTiles,
+                totalTurns: prevState.totalTurns + 1,
+                avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1),
+                score : this.getScoreFromTiles(this.state.playerTiles)
             }
         });
+      
     } // tileWasPlaced
 
     createTiles() {
@@ -110,10 +149,18 @@ class Game extends Component {
     }
     
     render() {
-        console.log("render pot" + this.state.potTiles);
-        console.log("render player tiles" + this.state.playerTiles);
+        console.log("toatal turns: " + this.state.totalTurns)
         return (
             <>
+             <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
+             <button type="button" onClick={this.handleStartClick}>start</button>
+                <Statistics 
+                    totalTurns = {this.state.totalTurns}
+                    totalPot = {this.state.totalPot}
+                    avgTimePerTurn={this.state.avgTimePerTurn}
+                    score = {this.state.score}
+                    />
+                    
                 <Board 
                     selectedTile={this.state.selectedTile}
                     tileWasPlaced={this.tileWasPlaced}
@@ -130,5 +177,7 @@ class Game extends Component {
     } // render
 } // Game
 
+
+  
 
 export default Game

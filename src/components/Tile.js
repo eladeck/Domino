@@ -49,8 +49,8 @@ class Tile extends Component {
   
   render(props) {
     let vertialictyStyle = this.determineVerticality();
-    console.log('in tile render verticailty is')
-    console.log(vertialictyStyle)
+    //console.log('in tile render verticailty is')
+   // console.log(vertialictyStyle)
     return (
       <div
         className='tile'
