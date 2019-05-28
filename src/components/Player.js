@@ -9,9 +9,11 @@ class Player extends Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-  } // c'tor tor
+  } 
+  
 
 
+  
   handleClick(event) {
     const tile = event.target.closest('div');
     if(tile) {
