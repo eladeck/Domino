@@ -6,7 +6,7 @@ import allTiles from './allTiles.js';
 class Board extends Component {
     constructor(props) {
         super(props);
-        this.boardSize = 200; // it's not part of the state! it's a property...
+        this.boardSize = 6; // it's not part of the state! it's a property...
 
         this.state = {
             jsx:null,
@@ -62,7 +62,7 @@ class Board extends Component {
         for(let i = 0; i < boardSize; i++) {
             for(let j = 0; j < boardSize; j++) {
                 //row.push(`${i}${j}`);
-                row.push(`11`);
+                row.push(` `);
             }
             board.push(row);
             row = [];
