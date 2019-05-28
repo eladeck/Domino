@@ -9,7 +9,7 @@ class Player extends Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-  } // c'tor
+  } // c'tor tor
 
 
   handleClick(event) {
