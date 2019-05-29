@@ -10,17 +10,18 @@ class Board extends Component {
 
         this.state = {
             jsx:null,
-            logicBoard:this.buildBoard(),
+            //logicBoard:this.buildBoard(),
             boardSize:26,
             tiles: allTiles,
             oldLogicBoard:[
-                        ['66', ' ','56'],
+                        ['66,2', ' ','56'],
                         [' ', '66',' '],
                         [' ', ' ',' ']
             ]
         }
+
+
         this.manageBoard = this.manageBoard.bind(this);
-        this.buildBoard = this.buildBoard.bind(this);
         this.handleClick = this.handleClick.bind(this);
     }
 
@@ -32,22 +33,26 @@ class Board extends Component {
         const j = id[1];
 
         // only if there is not already tile in this <td>, and if there's a selected tile
-        if(this.props.selectedTile && this.state.logicBoard[i][j] === ' ') {
+        if(this.props.selectedTile && this.props.logicBoard[i][j] === ' ') {
             const values = this.props.selectedTile.id;
             
             // only if the selecctedId is not empty string
             if(values) {
                 this.props.tileWasPlaced(this.props.selectedTile);
 
-                this.setState(prevState => {
-                    let newLogicBoard = prevState.logicBoard; // deep or shallow copy? to think about whats better
-                    newLogicBoard[i][j] = `${values},${this.props.selectedTile.parentNode.id[11]}`; // {values,verticality}
-                    console.log(newLogicBoard[i][j])
+                // this.setState(prevState => {
+                //     let newLogicBoard = prevState.logicBoard; // deep or shallow copy? to think about whats better
+                //     newLogicBoard[i][j] = `${values},${this.props.selectedTile.parentNode.id[11]}`; // {values,verticality}
+                //     console.log(newLogicBoard[i][j])
         
-                    return {
-                        logicBoard:newLogicBoard
-                    }
-                })
+                //     return {
+                //         logicBoard:newLogicBoard
+                //     }
+                // })
+                
+                let newLogicBoard = this.props.logicBoard; // this.props.logicBoard equals "prevState.logicBoard"
+                newLogicBoard[i][j] = `${values},${this.props.selectedTile.parentNode.id[11]}`; // {values,verticality} 
+                this.props.updateLogicBoard(newLogicBoard)
             } // if value
     
             //this.manageBoard();
@@ -95,12 +100,12 @@ class Board extends Component {
             for(let j = 0; j < boardSize; j++) {
                 tds.push(
                     <td key={`${i},${j}`} id={`${i},${j}`} align="center" onClick={this.handleClick}>
-                        {this.state.logicBoard[i][j] === ' ' ? null : 
+                        {this.props.logicBoard[i][j] === ' ' ? null : 
                         <Tile
                             key={`${i}${j}`}
-                            top={this.state.logicBoard[i][j][0]}
-                            bottom={this.state.logicBoard[i][j][1]}
-                            verticality={this.state.logicBoard[i][j][3]}
+                            top={this.props.logicBoard[i][j][0]}
+                            bottom={this.props.logicBoard[i][j][1]}
+                            verticality={this.props.logicBoard[i][j][3]}
                         />
                         }
                     </td>);
