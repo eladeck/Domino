@@ -3,6 +3,9 @@ import Board from './Board.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
 import Statistics from './Statistics.js'
+import cloneDeep from 'lodash/cloneDeep';
+import Back from './back.png'
+import Front from './front.png'
 
 
 function formatSeconds(secondsElapsed) {
@@ -16,7 +19,7 @@ class Game extends Component {
     
     constructor(props) {
         super(props);
-        
+        this.isGameStated = false;
         this.statesArray = [];
         const shuffledTiles = this.shuffleTiles();
         const firstSix = shuffledTiles.slice(0, 6);
@@ -36,7 +39,8 @@ class Game extends Component {
             avgTimePerTurn: 0,
             score: this.getScoreFromTiles(firstSix),
             prevTurn: null,
-            currentStateIndex: 0
+            currentStateIndex: 0,
+            isGameStated: false
         }
         
         this.createTiles = this.createTiles.bind(this);
@@ -53,7 +57,7 @@ class Game extends Component {
         this.deepClone = this.deepClone.bind(this);
         this.handelPrevClick = this.handelPrevClick.bind(this);
         this.handelNextClick = this.handelNextClick.bind(this);
-
+        this.handleOpenMenuSatrtClick = this.handleOpenMenuSatrtClick.bind(this);
 
         
     }
@@ -77,6 +81,11 @@ class Game extends Component {
         console.log("handelUndoClcik");
         this.handelPrevClick();
         this.statesArray.pop();
+    }
+    handleOpenMenuSatrtClick()
+    {
+        console.log("i was clicked! mother fuckers");
+        this.setState({isGameStated : true});
     }
 
     updateLogicBoard(logicBoard) {
@@ -194,7 +203,8 @@ class Game extends Component {
             this.setState(prevState => {
                 const oldPotTiles = prevState.potTiles;
                 const oldPlayerTiles = prevState.playerTiles;
-                this.statesArray.push(this.deepClone(this.state));
+                this.statesArray.push(cloneDeep(this.state));                
+                // this.statesArray.push(this.deepClone(this.state));
                 oldPlayerTiles.push(oldPotTiles.splice(oldPotTiles.length -1, 1)[0]);
                 return{
                     potTiles: oldPotTiles,
@@ -234,7 +244,8 @@ class Game extends Component {
     } // shuffleTiles
 
     tileWasPlaced(tile) {
-        this.statesArray.push(this.deepClone(this.state));
+        // this.statesArray.push(this.deepClone(this.state));
+        this.statesArray.push(cloneDeep(this.state));                
         // 1. remove this Tile from "player tyles" (once you setThis state, the props to the Player will changed)
         this.setState(prevState => {
             const playerTiles = prevState.playerTiles;
@@ -268,8 +279,8 @@ class Game extends Component {
          console.log("stateArray" )
          console.log(this.statesArray);
         return (
-            <>
-            <br></br>
+            <div>
+            {this.state.isGameStated ? ( <div><br></br>
             <br></br>
 
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
@@ -301,9 +312,21 @@ class Game extends Component {
                     tileSelected={this.tileSelected}
                     handleSelected={this.handleSelected}
                     selectedTile={this.state.selectedTile}
-                />
-               
-              </>
+                /></div>) : 
+                ( 
+                    <div>
+                        <div title="flipping TAKI card" className="flipping-card-wrapper">
+                            <img className="front-card" src={Back}/>
+                            <img className="back-card" src={Front} />
+                        </div> 
+                          <div className="container-2" onClick={this.handleOpenMenuSatrtClick}>
+                                <div className="btn btn-two">
+                                 <span>Open Game</span>
+                                 </div>
+                        </div>
+                    </div>
+                )}
+               </div>
 
         )
     } // render
