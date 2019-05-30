@@ -3,7 +3,6 @@ import Board from './Board.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
 import Statistics from './Statistics.js'
-import cloneDeep from 'lodash/cloneDeep';
 
 
 function formatSeconds(secondsElapsed) {
@@ -47,13 +46,13 @@ class Game extends Component {
         this.takeTileFromPot = this.takeTileFromPot.bind(this);
         this.updateLogicBoard = this.updateLogicBoard.bind(this);
         this.buildBoard = this.buildBoard.bind(this);
-
+        this.handelUndoClcik = this.handelUndoClcik.bind(this);
         
         this.handleStartClick = this.handleStartClick.bind(this);
         this.getScoreFromTiles = this.getScoreFromTiles.bind(this);
         this.deepClone = this.deepClone.bind(this);
-        this.goPrevTurn = this.goPrevTurn.bind(this);
-        this.goNextTurn = this.goNextTurn.bind(this);
+        this.handelPrevClick = this.handelPrevClick.bind(this);
+        this.handelNextClick = this.handelNextClick.bind(this);
 
 
         
@@ -74,6 +73,11 @@ class Game extends Component {
 
         return board;
     }
+    handelUndoClcik(){
+        console.log("handelUndoClcik");
+        this.handelPrevClick();
+        this.statesArray.pop();
+    }
 
     updateLogicBoard(logicBoard) {
         this.setState({
@@ -82,61 +86,50 @@ class Game extends Component {
     }
 
 
-    deepClone(x){
         
-            if (!item) { return item; } // null, undefined values check
-        
-            var types = [ Number, String, Boolean ], 
-                result;
-        
-            // normalizing primitives if someone did new String('aaa'), or new Number('444');
-            types.forEach(function(type) {
-                if (item instanceof type) {
-                    result = type( item );
-                }
-            });
-        
-            if (typeof result == "undefined") {
-                if (Object.prototype.toString.call( item ) === "[object Array]") {
-                    result = [];
-                    item.forEach(function(child, index, array) { 
-                        result[index] = clone( child );
-                    });
-                } else if (typeof item == "object") {
-                    // testing that this is DOM
-                    if (item.nodeType && typeof item.cloneNode == "function") {
-                        result = item.cloneNode( true );    
-                    } else if (!item.prototype) { // check that this is a literal
-                        if (item instanceof Date) {
-                            result = new Date(item);
-                        } else {
-                            // it is an object literal
-                            result = {};
-                            for (var i in item) {
-                                result[i] = clone( item[i] );
-                            }
-                        }
-                    } else {
-                        // depending what you would like here,
-                        // just keep the reference, or create new object
-                        if (false && item.constructor) {
-                            // would not advice to do that, reason? Read below
-                            result = new item.constructor();
-                        } else {
-                            result = item;
+     deepClone(obj) {
+        var visitedNodes = [];
+        var clonedCopy = [];
+        function clone(item) {
+            if (typeof item === "object" && !Array.isArray(item)) {
+                if (visitedNodes.indexOf(item) === -1) {
+                    visitedNodes.push(item);
+                    var cloneObject = {};
+                    clonedCopy.push(cloneObject);
+                    for (var i in item) {
+                        if (item.hasOwnProperty(i)) {
+                            cloneObject[i] = clone(item[i]);
                         }
                     }
+                    return cloneObject;
                 } else {
-                    result = item;
+                    return clonedCopy[visitedNodes.indexOf(item)];
                 }
             }
-        
-            return result;
-        
+            else if (typeof item === "object" && Array.isArray(item)) {
+                if (visitedNodes.indexOf(item) === -1) {
+                    var cloneArray = [];
+                    visitedNodes.push(item);
+                    clonedCopy.push(cloneArray);
+                    for (var j = 0; j < item.length; j++) {
+                        cloneArray.push(clone(item[j]));
+                    }
+                    return cloneArray;
+                } else {
+                    return clonedCopy[visitedNodes.indexOf(item)];
+                }
+            }
+    
+            return item; // not object, not array, therefore primitive
+        }
+        return clone(obj);
     }
+    
 
-    goPrevTurn(){
-        console.log("goPrevTurn was clicked!");
+
+
+    handelPrevClick(){
+        console.log("handelPrevClick was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex -1])
         // if(this.state.prevTurn !== null)
         // {
@@ -161,14 +154,12 @@ class Game extends Component {
 
     }
 
-    goNextTurn(){
+    handelNextClick(){
         console.log("next was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex + 1])
 
     }
-    deepClone(x) {
-        return JSON.parse(JSON.stringify(x));
-    }
+
     getScoreFromTiles(playerTiles){
      
         let res = 0;
@@ -203,14 +194,14 @@ class Game extends Component {
             this.setState(prevState => {
                 const oldPotTiles = prevState.potTiles;
                 const oldPlayerTiles = prevState.playerTiles;
-                this.statesArray.push(cloneDeep(this.state));
+                this.statesArray.push(this.deepClone(this.state));
                 oldPlayerTiles.push(oldPotTiles.splice(oldPotTiles.length -1, 1)[0]);
                 return{
                     potTiles: oldPotTiles,
                     playerTiles : oldPlayerTiles,
                     totalTurns: prevState.totalTurns + 1,
                     totalPot: prevState.totalPot + 1,
-                    avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1 ),
+                    avgTimePerTurn: (prevState.secondsElapsed / (prevState.totalTurns + 1 )).toFixed(2),
                     score : this.getScoreFromTiles(this.state.playerTiles),
                     currentStateIndex: prevState.currentStateIndex  + 1,
                   //  prevTurn : turns1
@@ -243,8 +234,7 @@ class Game extends Component {
     } // shuffleTiles
 
     tileWasPlaced(tile) {
-
-        this.statesArray.push(cloneDeep(this.state));
+        this.statesArray.push(this.deepClone(this.state));
         // 1. remove this Tile from "player tyles" (once you setThis state, the props to the Player will changed)
         this.setState(prevState => {
             const playerTiles = prevState.playerTiles;
@@ -255,9 +245,7 @@ class Game extends Component {
                 totalTurns: prevState.totalTurns + 1,
                 avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1),
                 score : this.getScoreFromTiles(this.state.playerTiles),
-                currentStateIndex: prevState.currentStateIndex  + 1,
-             //   prevTurn : turns1
-                
+                currentStateIndex: prevState.currentStateIndex  + 1,                
             }
         });
       
@@ -281,11 +269,18 @@ class Game extends Component {
          console.log(this.statesArray);
         return (
             <>
+            <br></br>
+            <br></br>
+
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
-             <button type="button" onClick={this.handleStartClick}>start</button>
-             <button onClick={this.takeTileFromPot}>Pot</button>
-             <button onClick={this.goPrevTurn}>back!</button>
-             <button onClick={this.goNextTurn}>next!</button>
+             <button className="btnStyle" onClick={this.handleStartClick}>start</button>
+             <button className="btnStyle" onClick={this.takeTileFromPot}>Pot</button>
+             <br></br>
+             <button className="btnStyle" onClick={this.handelPrevClick}>back!</button>
+             <button className="btnStyle" onClick={this.handelNextClick}>next!</button>
+             <br></br>
+             <button className="btnStyle" onClick={this.handelUndoClcik}>undo!</button>
+
 
                 <Statistics 
                     totalTurns = {this.state.totalTurns}
@@ -307,7 +302,9 @@ class Game extends Component {
                     handleSelected={this.handleSelected}
                     selectedTile={this.state.selectedTile}
                 />
-            </>
+               
+              </>
+
         )
     } // render
 } // Game
