@@ -4,8 +4,6 @@ import Player from './Player.js';
 import Grid from './Grid.js';
 import Statistics from './Statistics.js'
 import cloneDeep from 'lodash/cloneDeep';
-import Back from './back.png'
-import Front from './front.png'
 
 
 function formatSeconds(secondsElapsed) {
@@ -19,11 +17,11 @@ class Game extends Component {
     
     constructor(props) {
         super(props);
-        this.isGameStated = false;
+        
         this.statesArray = [];
         const shuffledTiles = this.shuffleTiles();
         const firstSix = shuffledTiles.slice(0, 6);
-        this.boardSize = 10;
+        this.boardSize = 58; // some extra room so we don't get to the edges!
 
         this.state = {
             tiles: this.createTiles(), // ["00","01", ... ] 
@@ -32,6 +30,7 @@ class Game extends Component {
             playerTiles: shuffledTiles.slice(0, 6),
             selectedTile:null, // a REAL reference to the tile <div> element! (it's id is selectedTile.id)
             logicBoard: this.buildBoard(),
+
             //stats
             secondsElapsed: 0,
             totalTurns: 0,
@@ -39,8 +38,7 @@ class Game extends Component {
             avgTimePerTurn: 0,
             score: this.getScoreFromTiles(firstSix),
             prevTurn: null,
-            currentStateIndex: 0,
-            isGameStated: false
+            currentStateIndex: 0
         }
         
         this.createTiles = this.createTiles.bind(this);
@@ -50,17 +48,194 @@ class Game extends Component {
         this.takeTileFromPot = this.takeTileFromPot.bind(this);
         this.updateLogicBoard = this.updateLogicBoard.bind(this);
         this.buildBoard = this.buildBoard.bind(this);
-        this.handelUndoClcik = this.handelUndoClcik.bind(this);
+        this.isMoveValid = this.isMoveValid.bind(this);
+
         
         this.handleStartClick = this.handleStartClick.bind(this);
         this.getScoreFromTiles = this.getScoreFromTiles.bind(this);
         this.deepClone = this.deepClone.bind(this);
-        this.handelPrevClick = this.handelPrevClick.bind(this);
-        this.handelNextClick = this.handelNextClick.bind(this);
-        this.handleOpenMenuSatrtClick = this.handleOpenMenuSatrtClick.bind(this);
+        this.goPrevTurn = this.goPrevTurn.bind(this);
+        this.goNextTurn = this.goNextTurn.bind(this);
+
 
         
     }
+
+    boardIsEmpty() {
+        for(let i = 0; i < this.boardSize; i++) 
+            for(let j = 0; j < this.boardSize; j++) 
+                if(this.state.logicBoard[i][j] !== ' ')
+                    return false;
+        return true;
+    } // boardIsEmpty
+    
+    isMoveValid(indexI, indexJ) {
+        console.log(`inside Move Valid`)
+        
+        // assuming logicBoard[i,j] is empty ' ', and there IS a selectedTile (both checked by the <Table /> Component)
+        const i = parseInt(indexI);
+        const j = parseInt(indexJ);
+        const middleI = 27;
+        const middleJ = 27;
+        console.log(i, j)
+        if(i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1) {
+            console.log(`can't put in the edge`);
+            return false;
+        }
+        if(this.boardIsEmpty() && i === middleI && j === middleJ) {
+            console.log(`first move DONE!`);
+            return true;
+        }
+
+        // not in the edge:
+        const board = this.state.logicBoard;
+        const selectedTile = this.state.selectedTile;
+        const verticality = Number(selectedTile.parentNode.id[11]);
+        const top = Number(selectedTile.id[0]);
+        const bottom = Number(selectedTile.id[1]);
+        const isDouble = bottom === top;
+
+        function createNeighboor(indexI, indexJ) {
+            const values = board[indexI][indexJ];
+            if(values === ' ') return null;
+
+            const topBottomStr = values.split(',')[0];
+            const verticalityInt = parseInt(values.split(',')[1]);
+            const isDouble = topBottomStr[0] === topBottomStr[1];
+            const meuzan = verticalityInt === 1 || verticalityInt === 3; 
+            const meunah = verticalityInt === 2 || verticalityInt === 0; 
+            let deFactoBottom = null;
+            let deFactoTop = null;
+            let deFactoRight = null;
+            let deFactoLeft = null;
+
+            if(meunah) { // 
+                deFactoTop = parseInt(topBottomStr[verticalityInt === 0 ? 0 : 1]);
+                deFactoBottom = parseInt(topBottomStr[verticalityInt === 2 ? 0 : 1]);
+            } else {
+                deFactoRight = parseInt(topBottomStr[verticalityInt === 1 ? 0 : 1]);
+                deFactoLeft = parseInt(topBottomStr[verticalityInt === 3 ? 0 : 1]);
+            } // else
+
+            return {
+                meunah,
+                meuzan,
+                verticalityInt,
+                topBottomStr,
+                isDouble,
+                deFactoBottom,
+                deFactoTop,
+                deFactoRight, 
+                deFactoLeft,
+            };
+        } // function createNeighboot
+
+        const aboveMe = createNeighboor(i - 1, j);
+        const bellowMe = createNeighboor(i + 1, j);
+        const toMyLeft = createNeighboor(i, j - 1);
+        const toMyRight = createNeighboor(i, j + 1);
+
+        console.log([aboveMe, toMyRight, bellowMe, toMyLeft]); 
+
+        let moveValid = false;
+
+        switch(verticality) { // assuming you can't put in the edges (we will build the board enough big)
+            case 0: // Tile to put is Regular-Veritcal.
+                if(isDouble) { // is double
+                    if(aboveMe && !moveValid) {
+                        moveValid = (top === aboveMe.deFactoBottom) || (aboveMe.isDouble && aboveMe.meuzan && aboveMe.deFactoLeft === top);
+                    }
+                    if(bellowMe && !moveValid) {
+                        moveValid = (bottom === bellowMe.deFactoTop) || (bellowMe.isDouble && bellowMe.meuzan && bellowMe.deFactoLeft === bottom);
+                    }
+                    if(toMyLeft && !moveValid) {
+                        moveValid = toMyLeft.meuzan && toMyLeft.deFactoRight === top;
+                    }
+                    if(toMyRight && !moveValid) {
+                        moveValid = toMyRight.meuzan && toMyRight.deFactoLeft === top;
+                    }
+                } else { // I am not a double
+                    if(aboveMe && !moveValid) { 
+                        moveValid = (top === aboveMe.deFactoBottom) || (aboveMe.isDouble && aboveMe.meuzan && aboveMe.deFactoLeft === top);
+                    } 
+                    if(bellowMe && !moveValid) {
+                        moveValid = (bottom === bellowMe.deFactoTop) || (bellowMe.isDouble && bellowMe.meuzan && bellowMe.deFactoLeft === bottom);
+                    }
+                } // else (its not a double) case verticality = 0
+                break;
+            case 1: // I am meuzan! top is myRight
+                    if(isDouble) { // is I am double
+                        if(aboveMe && !moveValid) {
+                            moveValid = (top === aboveMe.deFactoBottom && aboveMe.meunah)
+                        }
+                        if(bellowMe && !moveValid) {
+                            moveValid = (top === bellowMe.deFactoTop && bellowMe.meunah)
+                        }
+                        if(toMyLeft && !moveValid) {
+                            moveValid = (toMyLeft.meuzan && toMyLeft.deFactoRight === bottom);
+                        }
+                        if(toMyRight && !moveValid) {
+                            moveValid = toMyRight.meuzan && toMyRight.deFactoLeft === top;
+                        }
+                    } else { // I am not a double
+                        if(toMyLeft && !moveValid) {
+                            moveValid = (toMyLeft.meuzan && toMyLeft.deFactoRight === bottom) || (toMyLeft.meunah && toMyLeft.isDouble && toMyLeft.deFactoTop === bottom);
+                        }
+                        if(toMyRight && !moveValid) {
+                            moveValid = (toMyRight.meuzan && toMyRight.deFactoLeft === top) || (toMyRight.meunah && toMyRight.isDouble && toMyRight.deFactoTop === top);
+                        }
+                    } 
+                break;
+            case 2: // I am meunah UpSide DOWN!
+                    if(isDouble) { // is I am double
+                        if(aboveMe && !moveValid) {
+                            moveValid = (top === aboveMe.deFactoBottom && aboveMe.meunah)
+                        }
+                        if(bellowMe && !moveValid) {
+                            moveValid = (top === bellowMe.deFactoTop && bellowMe.meunah)
+                        }
+                        if(toMyLeft && !moveValid) {
+                            moveValid = (toMyLeft.meuzan && toMyLeft.deFactoRight === bottom);
+                        }
+                        if(toMyRight && !moveValid) {
+                            moveValid = toMyRight.meuzan && toMyRight.deFactoLeft === top;
+                        }
+                    } else { // I am not a double
+                        if(aboveMe && !moveValid) {
+                            moveValid = (bottom === aboveMe.deFactoBottom && aboveMe.meunah) || (aboveMe.isDouble && aboveMe.meuzan && aboveMe.deFactoRight === bottom)
+                        }
+                        if(bellowMe && !moveValid) {
+                            moveValid = (top === bellowMe.deFactoTop && bellowMe.meunah) || (bellowMe.isDouble && bellowMe.meuzan && bellowMe.deFactoRight === top)
+                        }
+                    } 
+                break;
+            case 3: // I am meuzan !!!TOP IS LEFT!!
+            if(isDouble) { // is I am double
+                if(aboveMe && !moveValid) {
+                    moveValid = (top === aboveMe.deFactoBottom && aboveMe.meunah)
+                }
+                if(bellowMe && !moveValid) {
+                    moveValid = (top === bellowMe.deFactoTop && bellowMe.meunah)
+                }
+                if(toMyLeft && !moveValid) {
+                    moveValid = (toMyLeft.meuzan && toMyLeft.deFactoRight === bottom);
+                }
+                if(toMyRight && !moveValid) {
+                    moveValid = toMyRight.meuzan && toMyRight.deFactoLeft === top;
+                }
+            } else { // I am not a double
+                if(toMyLeft && !moveValid) {
+                    moveValid = (toMyLeft.meuzan && toMyLeft.deFactoRight === top) || (toMyLeft.meunah && toMyLeft.isDouble && toMyLeft.deFactoTop === top);
+                }
+                if(toMyRight && !moveValid) {
+                    moveValid = (toMyRight.meuzan && toMyRight.deFactoLeft === bottom) || (toMyRight.meunah && toMyRight.isDouble && toMyRight.deFactoTop === bottom);
+                }
+            } 
+                break;
+            } // switch
+
+        return moveValid;
+    } // isMoveValid
 
     buildBoard() {
         const boardSize = this.boardSize;
@@ -77,16 +252,6 @@ class Game extends Component {
 
         return board;
     }
-    handelUndoClcik(){
-        console.log("handelUndoClcik");
-        this.handelPrevClick();
-        this.statesArray.pop();
-    }
-    handleOpenMenuSatrtClick()
-    {
-        console.log("i was clicked! mother fuckers");
-        this.setState({isGameStated : true});
-    }
 
     updateLogicBoard(logicBoard) {
         this.setState({
@@ -95,50 +260,61 @@ class Game extends Component {
     }
 
 
+    deepClone(x){
         
-     deepClone(obj) {
-        var visitedNodes = [];
-        var clonedCopy = [];
-        function clone(item) {
-            if (typeof item === "object" && !Array.isArray(item)) {
-                if (visitedNodes.indexOf(item) === -1) {
-                    visitedNodes.push(item);
-                    var cloneObject = {};
-                    clonedCopy.push(cloneObject);
-                    for (var i in item) {
-                        if (item.hasOwnProperty(i)) {
-                            cloneObject[i] = clone(item[i]);
+            if (!item) { return item; } // null, undefined values check
+        
+            var types = [ Number, String, Boolean ], 
+                result;
+        
+            // normalizing primitives if someone did new String('aaa'), or new Number('444');
+            types.forEach(function(type) {
+                if (item instanceof type) {
+                    result = type( item );
+                }
+            });
+        
+            if (typeof result == "undefined") {
+                if (Object.prototype.toString.call( item ) === "[object Array]") {
+                    result = [];
+                    item.forEach(function(child, index, array) { 
+                        result[index] = clone( child );
+                    });
+                } else if (typeof item == "object") {
+                    // testing that this is DOM
+                    if (item.nodeType && typeof item.cloneNode == "function") {
+                        result = item.cloneNode( true );    
+                    } else if (!item.prototype) { // check that this is a literal
+                        if (item instanceof Date) {
+                            result = new Date(item);
+                        } else {
+                            // it is an object literal
+                            result = {};
+                            for (var i in item) {
+                                result[i] = clone( item[i] );
+                            }
+                        }
+                    } else {
+                        // depending what you would like here,
+                        // just keep the reference, or create new object
+                        if (false && item.constructor) {
+                            // would not advice to do that, reason? Read below
+                            result = new item.constructor();
+                        } else {
+                            result = item;
                         }
                     }
-                    return cloneObject;
                 } else {
-                    return clonedCopy[visitedNodes.indexOf(item)];
+                    result = item;
                 }
             }
-            else if (typeof item === "object" && Array.isArray(item)) {
-                if (visitedNodes.indexOf(item) === -1) {
-                    var cloneArray = [];
-                    visitedNodes.push(item);
-                    clonedCopy.push(cloneArray);
-                    for (var j = 0; j < item.length; j++) {
-                        cloneArray.push(clone(item[j]));
-                    }
-                    return cloneArray;
-                } else {
-                    return clonedCopy[visitedNodes.indexOf(item)];
-                }
-            }
-    
-            return item; // not object, not array, therefore primitive
-        }
-        return clone(obj);
+        
+            return result;
+        
     }
-    
 
-
-
-    handelPrevClick(){
-        console.log("handelPrevClick was clicked!");
+    goPrevTurn(){
+        console.log("goPrevTurn was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex -1])
         // if(this.state.prevTurn !== null)
         // {
@@ -163,12 +339,14 @@ class Game extends Component {
 
     }
 
-    handelNextClick(){
+    goNextTurn(){
         console.log("next was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex + 1])
 
     }
-
+    deepClone(x) {
+        return JSON.parse(JSON.stringify(x));
+    }
     getScoreFromTiles(playerTiles){
      
         let res = 0;
@@ -203,15 +381,14 @@ class Game extends Component {
             this.setState(prevState => {
                 const oldPotTiles = prevState.potTiles;
                 const oldPlayerTiles = prevState.playerTiles;
-                this.statesArray.push(cloneDeep(this.state));                
-                // this.statesArray.push(this.deepClone(this.state));
+                this.statesArray.push(cloneDeep(this.state));
                 oldPlayerTiles.push(oldPotTiles.splice(oldPotTiles.length -1, 1)[0]);
                 return{
                     potTiles: oldPotTiles,
                     playerTiles : oldPlayerTiles,
                     totalTurns: prevState.totalTurns + 1,
                     totalPot: prevState.totalPot + 1,
-                    avgTimePerTurn: (prevState.secondsElapsed / (prevState.totalTurns + 1 )).toFixed(2),
+                    avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1 ),
                     score : this.getScoreFromTiles(this.state.playerTiles),
                     currentStateIndex: prevState.currentStateIndex  + 1,
                   //  prevTurn : turns1
@@ -244,8 +421,8 @@ class Game extends Component {
     } // shuffleTiles
 
     tileWasPlaced(tile) {
-        // this.statesArray.push(this.deepClone(this.state));
-        this.statesArray.push(cloneDeep(this.state));                
+
+        this.statesArray.push(cloneDeep(this.state));
         // 1. remove this Tile from "player tyles" (once you setThis state, the props to the Player will changed)
         this.setState(prevState => {
             const playerTiles = prevState.playerTiles;
@@ -256,7 +433,9 @@ class Game extends Component {
                 totalTurns: prevState.totalTurns + 1,
                 avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1),
                 score : this.getScoreFromTiles(this.state.playerTiles),
-                currentStateIndex: prevState.currentStateIndex  + 1,                
+                currentStateIndex: prevState.currentStateIndex  + 1,
+             //   prevTurn : turns1
+                
             }
         });
       
@@ -279,19 +458,12 @@ class Game extends Component {
          console.log("stateArray" )
          console.log(this.statesArray);
         return (
-            <div>
-            {this.state.isGameStated ? ( <div><br></br>
-            <br></br>
-
+            <>
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
-             <button className="btnStyle" onClick={this.handleStartClick}>start</button>
-             <button className="btnStyle" onClick={this.takeTileFromPot}>Pot</button>
-             <br></br>
-             <button className="btnStyle" onClick={this.handelPrevClick}>back!</button>
-             <button className="btnStyle" onClick={this.handelNextClick}>next!</button>
-             <br></br>
-             <button className="btnStyle" onClick={this.handelUndoClcik}>undo!</button>
-
+             <button type="button" onClick={this.handleStartClick}>start</button>
+             <button onClick={this.takeTileFromPot}>Pot</button>
+             <button onClick={this.goPrevTurn}>back!</button>
+             <button onClick={this.goNextTurn}>next!</button>
 
                 <Statistics 
                     totalTurns = {this.state.totalTurns}
@@ -305,6 +477,7 @@ class Game extends Component {
                     tileWasPlaced={this.tileWasPlaced}
                     updateLogicBoard={this.updateLogicBoard}
                     logicBoard={this.state.logicBoard}
+                    isMoveValid={this.isMoveValid}
 
                 />
                 <Player 
@@ -312,22 +485,8 @@ class Game extends Component {
                     tileSelected={this.tileSelected}
                     handleSelected={this.handleSelected}
                     selectedTile={this.state.selectedTile}
-                /></div>) : 
-                ( 
-                    <div>
-                        <div title="flipping TAKI card" className="flipping-card-wrapper">
-                            <img className="front-card" src={Back}/>
-                            <img className="back-card" src={Front} />
-                        </div> 
-                          <div className="container-2" onClick={this.handleOpenMenuSatrtClick}>
-                                <div className="btn btn-two">
-                                 <span>Open Game</span>
-                                 </div>
-                        </div>
-                    </div>
-                )}
-               </div>
-
+                />
+            </>
         )
     } // render
 } // Game
