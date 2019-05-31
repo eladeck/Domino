@@ -1,6 +1,38 @@
 body {
-    background-color: bisque;
+		background-color: bisque;
+		overflow: hidden
 }
+
+::-webkit-scrollbar {
+  width: 50px;
+  height: 50px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  /* background: #f1f1f1;  */
+	background:transparent;
+	border-left: 50px solid transparent;
+	border-right: 50px solid transparent;
+	/* linear-gradient(to right, transparent 70%, rgb(243, 237, 237)); */
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+	/* background: #888;  */
+	background-image: url("scroll-img (2).png");
+	background-repeat: no-repeat;
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+}
+
+
+/* Handle on hover */
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+} */
 
 header {
     position: fixed;
@@ -41,12 +73,21 @@ header {
   color: #444;
 }
 
-.game-table {
+.table-wrapper {
+	width: 600px;
+	height:600px;
+	overflow:scroll;
+	position: relative;
+	top:-200px;
+	left:350px;
+}
 
-		top: 60px;
-		left: 300px;
+.game-table {
+		table-layout: fixed;
+		width: 100%;
+		/* top: 60px;
+		left: 300px; */
 		position: absolute;
-		overflow:scroll;
 		box-shadow: 8px 6px 19px 1px rgb(163, 198, 214);
 		background-color:lightgrey;
 }
@@ -61,9 +102,11 @@ td {
 	margin: 0;
 	position: absolute;
 	top: 50px;
-	left: 150px;
+	left: 200px;
 
 }
+
+
 
 /*Shay's Themeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:*/
 
@@ -322,25 +365,4 @@ td {
 	border-radius: 4em;
 	background-color: #fff;
  } 
- 
-
- /* /////  dsffffffffffffffffffffffffff*/
- .btnStyle {
-	margin:5px;
-	height: 25px;
-  width: 48px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
- } 
-
- .box{
-		width: 100px;
-		padding: 10px;
-		border: 5px solid gray;
-		margin: 0;
-		font-size: 10px;
-		font-family: "verdana";
-	}
- 
  

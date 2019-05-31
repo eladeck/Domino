@@ -14,7 +14,7 @@ class Statistics extends Component {
 
     render() {
         return (
-            <div className="box">
+            <div>
                 <h3>total turns: {this.props.totalTurns}</h3>
                 <h3>total Pot: {this.props.totalPot}</h3>
                 <h3>average time: {this.props.avgTimePerTurn}</h3>
