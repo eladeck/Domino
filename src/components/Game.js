@@ -4,7 +4,8 @@ import Player from './Player.js';
 import Grid from './Grid.js';
 import Statistics from './Statistics.js'
 import cloneDeep from 'lodash/cloneDeep';
-
+import Back from './back.png';
+import Front from './front.png';
 
 function formatSeconds(secondsElapsed) {
     const minutes = Math.floor(secondsElapsed / 60);
@@ -17,7 +18,6 @@ class Game extends Component {
     
     constructor(props) {
         super(props);
-        
         this.statesArray = [];
         const shuffledTiles = this.shuffleTiles();
         const firstSix = shuffledTiles.slice(0, 6);
@@ -38,7 +38,8 @@ class Game extends Component {
             avgTimePerTurn: 0,
             score: this.getScoreFromTiles(firstSix),
             prevTurn: null,
-            currentStateIndex: 0
+            currentStateIndex: 0,
+            isGameStated: false
         }
         
         this.createTiles = this.createTiles.bind(this);
@@ -49,13 +50,17 @@ class Game extends Component {
         this.updateLogicBoard = this.updateLogicBoard.bind(this);
         this.buildBoard = this.buildBoard.bind(this);
         this.isMoveValid = this.isMoveValid.bind(this);
-
+        this.handelUndoClcik = this.handelUndoClcik.bind(this);
         
         this.handleStartClick = this.handleStartClick.bind(this);
         this.getScoreFromTiles = this.getScoreFromTiles.bind(this);
         this.deepClone = this.deepClone.bind(this);
-        this.goPrevTurn = this.goPrevTurn.bind(this);
-        this.goNextTurn = this.goNextTurn.bind(this);
+
+
+        this.handelPrevClick = this.handelPrevClick.bind(this);
+        this.handelNextClick = this.handelNextClick.bind(this);
+        this.handleOpenMenuSatrtClick = this.handleOpenMenuSatrtClick.bind(this);
+
 
 
         
@@ -259,6 +264,16 @@ class Game extends Component {
         })
     }
 
+    handelUndoClcik(){
+        console.log("handelUndoClcik");
+        this.handelPrevClick();
+        this.statesArray.pop();
+    }
+    handleOpenMenuSatrtClick()
+    {
+        console.log("i was clicked! mother fuckers");
+        this.setState({isGameStated : true});
+    }
 
     deepClone(x){
         
@@ -313,7 +328,7 @@ class Game extends Component {
         
     }
 
-    goPrevTurn(){
+    handelPrevClick(){
         console.log("goPrevTurn was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex -1])
         // if(this.state.prevTurn !== null)
@@ -339,14 +354,16 @@ class Game extends Component {
 
     }
 
-    goNextTurn(){
+    handelNextClick(){
         console.log("next was clicked!");
         this.setState(this.statesArray[this.state.currentStateIndex + 1])
 
     }
+
     deepClone(x) {
         return JSON.parse(JSON.stringify(x));
     }
+
     getScoreFromTiles(playerTiles){
      
         let res = 0;
@@ -458,12 +475,19 @@ class Game extends Component {
          console.log("stateArray" )
          console.log(this.statesArray);
         return (
-            <>
+            <div>
+            {this.state.isGameStated ? ( <div><br></br>
+            <br></br>
+
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
-             <button type="button" onClick={this.handleStartClick}>start</button>
-             <button onClick={this.takeTileFromPot}>Pot</button>
-             <button onClick={this.goPrevTurn}>back!</button>
-             <button onClick={this.goNextTurn}>next!</button>
+             <button className="btnStyle" onClick={this.handleStartClick}>start</button>
+             <button className="btnStyle" onClick={this.takeTileFromPot}>Pot</button>
+             <br></br>
+             <button className="btnStyle" onClick={this.handelPrevClick}>back!</button>
+             <button className="btnStyle" onClick={this.handelNextClick}>next!</button>
+             <br></br>
+             <button className="btnStyle" onClick={this.handelUndoClcik}>undo!</button>
+
 
                 <Statistics 
                     totalTurns = {this.state.totalTurns}
@@ -477,7 +501,7 @@ class Game extends Component {
                     tileWasPlaced={this.tileWasPlaced}
                     updateLogicBoard={this.updateLogicBoard}
                     logicBoard={this.state.logicBoard}
-                    isMoveValid={this.isMoveValid}
+                    isMoveValid={this.isMoveValid}                    
 
                 />
                 <Player 
@@ -485,13 +509,29 @@ class Game extends Component {
                     tileSelected={this.tileSelected}
                     handleSelected={this.handleSelected}
                     selectedTile={this.state.selectedTile}
-                />
-            </>
+                /></div>) : 
+                ( 
+                    <div>
+                        <div title="flipping TAKI card" className="flipping-card-wrapper">
+                            <img className="front-card" src={Back}/>
+                            <img className="back-card" src={Front} />
+                        </div> 
+                          <div className="container-2" onClick={this.handleOpenMenuSatrtClick}>
+                                <div className="btn btn-two">
+                                 <span>Open Game</span>
+                                 </div>
+                        </div>
+                    </div>
+                )}
+               </div>
+
         )
-    } // render
+} // render
 } // Game
 
 
   
 
 export default Game
+
+
