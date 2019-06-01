@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import Board from './Board.js';
 import Player from './Player.js';
-import Grid from './Grid.js';
 import Statistics from './Statistics.js'
 import cloneDeep from 'lodash/cloneDeep';
 import Back from './back.png';
@@ -19,6 +18,7 @@ class Game extends Component {
     constructor(props) {
         super(props);
         this.statesArray = [];
+        this.isLastTileWasFlaced = false;
         const shuffledTiles = this.shuffleTiles();
         const firstSix = shuffledTiles.slice(0, 6);
         this.boardSize = 58; // some extra room so we don't get to the edges!
@@ -32,6 +32,7 @@ class Game extends Component {
             logicBoard: this.buildBoard(),
 
             //stats
+            incrementer: null,
             secondsElapsed: 0,
             totalTurns: 0,
             totalPot: 0,
@@ -39,7 +40,12 @@ class Game extends Component {
             score: this.getScoreFromTiles(firstSix),
             prevTurn: null,
             currentStateIndex: 0,
-            isGameStated: false
+            isGameStated: false,
+            isGameOver: false,
+            isLastTile: false,
+            isTimeStarted: false,
+            
+
         }
         
         this.createTiles = this.createTiles.bind(this);
@@ -60,7 +66,7 @@ class Game extends Component {
         this.handelPrevClick = this.handelPrevClick.bind(this);
         this.handelNextClick = this.handelNextClick.bind(this);
         this.handleOpenMenuSatrtClick = this.handleOpenMenuSatrtClick.bind(this);
-
+        this.finishGame = this.finishGame.bind(this);
 
 
         
@@ -269,6 +275,7 @@ class Game extends Component {
         this.handelPrevClick();
         this.statesArray.pop();
     }
+
     handleOpenMenuSatrtClick()
     {
         console.log("i was clicked! mother fuckers");
@@ -330,33 +337,26 @@ class Game extends Component {
 
     handelPrevClick(){
         console.log("goPrevTurn was clicked!");
+        if(this.state.currentStateIndex === parseInt(0))
+            alert("There are no more moves back");
         this.setState(this.statesArray[this.state.currentStateIndex -1])
-        // if(this.state.prevTurn !== null)
-        // {
-        //     // this.setState(prevState => {
-        //     //     return{
-        //     //      //   prevTurn: prevState.prevTurn - need to fix this to be maintainability 
-        //     //         potTiles: prevState.prevTurn.potTiles,
-        //     //         playerTiles: prevState.prevTurn.playerTiles,
-        //     //         selectedTile: prevState.prevTurn.selectedTile, // a REAL reference to the tile <div> element! (it's id is selectedTile.id)
-                    
-        //     //         //stats
-        //     //         secondsElapsed: prevState.prevTurn.secondsElapsed,
-        //     //         totalTurns: prevState.prevTurn.totalTurns,
-        //     //         totalPot: prevState.prevTurn.totalPot,
-        //     //         avgTimePerTurn: prevState.prevTurn.avgTimePerTurn,
-        //     //         score: prevState.prevTurn.score,
-        //     //         prevTurn: prevState.prevTurn.prevTurn,
-        //     //         logicBoard: prevState.prevTurn.logicBoard
-        //     //     }
-        //     // })
-        // }
-
     }
 
     handelNextClick(){
         console.log("next was clicked!");
-        this.setState(this.statesArray[this.state.currentStateIndex + 1])
+        console.log("length" + this.statesArray.length)
+        console.log("state" + this.state.currentStateIndex)
+
+        if(this.statesArray.length -1 === parseInt(this.state.currentStateIndex))
+        {
+                alert("Can not move step forward")
+        }
+        // else if (this.statesArray.length -2 === parseInt(this.state.currentStateIndex))
+        // {
+        //         console.log("do nothing")
+        // }
+        else
+               this.setState(this.statesArray[this.state.currentStateIndex + 1])
 
     }
 
@@ -405,7 +405,7 @@ class Game extends Component {
                     playerTiles : oldPlayerTiles,
                     totalTurns: prevState.totalTurns + 1,
                     totalPot: prevState.totalPot + 1,
-                    avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1 ),
+                    avgTimePerTurn: (prevState.secondsElapsed / (prevState.totalTurns + 1)).toFixed(2),
                     score : this.getScoreFromTiles(this.state.playerTiles),
                     currentStateIndex: prevState.currentStateIndex  + 1,
                   //  prevTurn : turns1
@@ -448,13 +448,25 @@ class Game extends Component {
                 selectedTile:null,
                 playerTiles,
                 totalTurns: prevState.totalTurns + 1,
-                avgTimePerTurn: prevState.secondsElapsed / (prevState.totalTurns + 1),
+                avgTimePerTurn: (prevState.secondsElapsed / (prevState.totalTurns + 1)).toFixed(2),
                 score : this.getScoreFromTiles(this.state.playerTiles),
                 currentStateIndex: prevState.currentStateIndex  + 1,
              //   prevTurn : turns1
                 
             }
         });
+        console.log("this is the players tles length " + this.state.playerTiles.length)
+        if(this.state.playerTiles.length  - 1 === parseInt('0'))
+        {
+
+            this.setState({isGameOver: true, isLastTile: true})
+            for(let i = 0; i < this.statesArray.length; i++)
+            {
+                this.statesArray[i].isGameOver = true;
+
+            }
+        }
+
       
     } // tileWasPlaced
 
@@ -467,6 +479,47 @@ class Game extends Component {
                 
         return res;
     }
+
+    finishGame()
+    {
+    //     clearInterval(this.state.incrementer);
+        const r = window.confirm("Do you want to play a new game");
+         if(r == true)
+          {
+            this.isLastTileWasFlaced = false;
+            this.shuffledTiles = this.shuffleTiles();
+            this.firstSix = this.shuffledTiles.slice(0, 6);
+            this.statesArray = [];
+               this.setState(
+                   {
+                    tiles: this.createTiles(), // ["00","01", ... ] 
+                    shuffledTiles: this.shuffledTiles,
+                    potTiles: this.shuffledTiles.slice(6, 28),
+                    playerTiles: this.shuffledTiles.slice(0, 6),
+                    selectedTile:null, // a REAL reference to the tile <div> element! (it's id is selectedTile.id)
+                    logicBoard: this.buildBoard(),
+        
+                    //stats
+                    secondsElapsed: 0,
+                    totalTurns: 0,
+                    totalPot: 0,
+                    avgTimePerTurn: 0,
+                    score: this.getScoreFromTiles(this.firstSix),
+                    prevTurn: null,
+                    currentStateIndex: 0,
+                    isGameStated: true,
+                    isGameOver: false,
+                    isLastTile: false,
+                    isTimeStarted: false,
+                   }
+               )
+               
+          }
+         
+
+
+        
+    }
     
     render() {
         // console.log("toatal turns: " + this.state.totalTurns)
@@ -474,19 +527,38 @@ class Game extends Component {
          console.log(this.state);
          console.log("stateArray" )
          console.log(this.statesArray);
+        if(this.state.isLastTile && this.isLastTileWasFlaced === false)  // push the last move to the array 
+        {
+            this.isLastTileWasFlaced = true;
+            console.log("push was made ")
+            this.setState({isLastTile: false})
+            this.statesArray.push(cloneDeep(this.state));
+            clearInterval(this.state.incrementer);
+
+        }
+        if(this.state.isTimeStarted === false && this.state.isGameStated === true)  // start the time only once 
+        {
+            this.handleStartClick();
+            this.setState({isTimeStarted: true});
+        }
+            
+        
+
+        
         return (
             <div>
             {this.state.isGameStated ? ( <div><br></br>
             <br></br>
-
+            <div>{this.state.isGameOver ? (<h1>you won</h1>) : null}</div>
              <h2>{formatSeconds(this.state.secondsElapsed)}</h2>
-             <button className="btnStyle" onClick={this.handleStartClick}>start</button>
-             <button className="btnStyle" onClick={this.takeTileFromPot}>Pot</button>
+             {/* <div>{this.state.isGameOver ? (null) :<button className="btnStyle" onClick={this.handleStartClick}>start</button>}</div> */}
+             <div>{this.state.isGameOver ? (null) : <button className="btnStyle" onClick={this.takeTileFromPot}>Pot</button>}</div>
              <br></br>
-             <button className="btnStyle" onClick={this.handelPrevClick}>back!</button>
-             <button className="btnStyle" onClick={this.handelNextClick}>next!</button>
+             <div>{this.state.isGameOver ? (<button className="btnStyle" onClick={this.handelPrevClick}>back!</button>) : (null)}</div>
+             <div>{this.state.isGameOver ? (<button className="btnStyle" onClick={this.handelNextClick}>next!</button>) : (null)}</div>
+             <div>{this.state.isGameOver ? (<button className="btnStyle" onClick={this.finishGame}>New Game!</button>) : (null)}</div>
              <br></br>
-             <button className="btnStyle" onClick={this.handelUndoClcik}>undo!</button>
+            <div>{this.state.isGameOver ? (null) : <button className="btnStyle" onClick={this.handelUndoClcik}>undo!</button>}</div>
 
 
                 <Statistics 
